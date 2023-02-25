@@ -52,7 +52,6 @@ public class CustomerController {
 
     @GetMapping(path = "/{nic}")
     public ResponseEntity<?> searchCustomerDetail(@PathVariable String nic) {
-//        CustomerDTO customerDTO = customerService.searchCustomer(nic);
         try {
             return ResponseEntity.ok(customerService.searchCustomer(nic));
         } catch (Exception ex) {
@@ -63,7 +62,6 @@ public class CustomerController {
 
     @GetMapping("/view-all")
     public ResponseEntity<?> getAllCustomerDetails() {
-//        List<CustomerDTO> allBookDetails = customerService.getAllCustomers();
         try {
             return ResponseEntity.ok(customerService.getAllCustomers());
         } catch (Exception ex) {
