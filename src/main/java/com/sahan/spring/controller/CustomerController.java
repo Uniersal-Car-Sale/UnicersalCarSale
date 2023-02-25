@@ -1,7 +1,11 @@
 package com.sahan.spring.controller;
 
 import com.sahan.spring.dto.CustomerDTO;
+import com.sahan.spring.exception.BaseException;
+import com.sahan.spring.exception.RecordAlreadySubmittedException;
+import com.sahan.spring.exception.RecordNotFoundException;
 import com.sahan.spring.service.CustomerService;
+import com.sahan.spring.util.HttpCustomStatus;
 import com.sahan.spring.util.StandradResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +28,10 @@ public class CustomerController {
     public ResponseEntity<?> addCustomer(@RequestBody CustomerDTO dto) {
         try {
             return ResponseEntity.ok(customerService.saveCustomer(dto));
-        } catch (Exception ex) {
+        } catch (RecordAlreadySubmittedException e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.status(HttpCustomStatus.RECORD_ALREADY_SUBMIT).body(e.getMessage());
+        } catch (BaseException ex) {
             log.error(ex.getMessage(), ex);
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -34,7 +41,10 @@ public class CustomerController {
     public ResponseEntity<?> deleteCustomer(@RequestParam String nic) {
         try {
             return ResponseEntity.ok(customerService.deleteCustomer(nic));
-        } catch (Exception ex) {
+        } catch (RecordNotFoundException e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.status(HttpCustomStatus.RECORD_NOT_FOUND).body(e.getMessage());
+        } catch (BaseException ex) {
             log.error(ex.getMessage(), ex);
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -44,7 +54,10 @@ public class CustomerController {
     public ResponseEntity<?> updateCustomer(@RequestBody CustomerDTO dto) {
         try {
             return ResponseEntity.ok(customerService.updateCustomer(dto));
-        } catch (Exception ex) {
+        } catch (RecordNotFoundException e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.status(HttpCustomStatus.RECORD_NOT_FOUND).body(e.getMessage());
+        } catch (BaseException ex) {
             log.error(ex.getMessage(), ex);
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -54,7 +67,10 @@ public class CustomerController {
     public ResponseEntity<?> searchCustomerDetail(@PathVariable String nic) {
         try {
             return ResponseEntity.ok(customerService.searchCustomer(nic));
-        } catch (Exception ex) {
+        } catch (RecordNotFoundException e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.status(HttpCustomStatus.RECORD_NOT_FOUND).body(e.getMessage());
+        } catch (BaseException ex) {
             log.error(ex.getMessage(), ex);
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -64,7 +80,7 @@ public class CustomerController {
     public ResponseEntity<?> getAllCustomerDetails() {
         try {
             return ResponseEntity.ok(customerService.getAllCustomers());
-        } catch (Exception ex) {
+        } catch (BaseException ex) {
             log.error(ex.getMessage(), ex);
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
