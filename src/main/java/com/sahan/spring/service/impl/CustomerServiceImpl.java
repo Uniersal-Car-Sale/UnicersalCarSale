@@ -2,6 +2,8 @@ package com.sahan.spring.service.impl;
 
 import com.sahan.spring.dto.CustomerDTO;
 import com.sahan.spring.entity.Customer;
+import com.sahan.spring.exception.RecordAlreadySubmittedException;
+import com.sahan.spring.exception.RecordNotFoundException;
 import com.sahan.spring.repo.CustomerRepo;
 import com.sahan.spring.service.CustomerService;
 import org.modelmapper.ModelMapper;
@@ -13,6 +15,9 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static com.sahan.spring.constant.ExceptionMessageConstant.*;
+import static com.sahan.spring.constant.AppConstant.*;
+
 @Service
 @Transactional
 public class CustomerServiceImpl implements CustomerService {
@@ -23,47 +28,46 @@ public class CustomerServiceImpl implements CustomerService {
     private ModelMapper mapper;
 
     @Override
-    public String saveCustomer(CustomerDTO dto) {
+    public String saveCustomer(CustomerDTO dto) throws RecordAlreadySubmittedException {
         if (!repo.existsById(dto.getNic())) {
             Customer c = mapper.map(dto, Customer.class);
             repo.save(c);
-            return "Saved Successfully";
+            return SAVE_SUCCESSFUL;
         } else {
-            throw new RuntimeException("Customer already exist!");
+            throw new RecordAlreadySubmittedException(CUSTOMER_ALREADY_SUBMITTED);
         }
     }
 
     @Override
-    public String updateCustomer(CustomerDTO dto) {
+    public String updateCustomer(CustomerDTO dto) throws RecordNotFoundException {
         if (repo.existsById(dto.getNic())) {
             Customer c = mapper.map(dto, Customer.class);
             repo.save(c);
-            return "Updated Successfully";
+            return UPDATE_SUCCESSFUL;
         } else {
-            throw new RuntimeException("No such customer to update..!");
+            throw new RecordNotFoundException(CUSTOMER_NOT_FOUND);
         }
     }
 
     @Override
-    public CustomerDTO searchCustomer(String nic) {
+    public CustomerDTO searchCustomer(String nic) throws RecordNotFoundException {
         Optional<Customer> customer = repo.findById(nic);
         if (customer.isPresent()) {
             return mapper.map(customer.get(), CustomerDTO.class);
         } else {
-            throw new RuntimeException("No customer details for id: " + nic);
+            throw new RecordNotFoundException(RECORD_NOT_FOUND + nic);
         }
     }
 
 
     @Override
-    public String deleteCustomer(String nic) {
+    public String deleteCustomer(String nic) throws RecordNotFoundException {
         if (repo.existsById(nic)) {
             repo.deleteById(nic);
-            return "Deleted Successfully";
+            return DELETE_SUCCESSFUL;
         } else {
-            throw new RuntimeException("No customer for delete ID: " + nic);
+            throw new RecordNotFoundException(RECORD_NOT_FOUND + nic);
         }
-
     }
 
     @Override
