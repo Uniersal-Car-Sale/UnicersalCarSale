@@ -2,6 +2,8 @@ package com.sahan.spring.service.impl;
 
 import com.sahan.spring.dto.SupplierDTO;
 import com.sahan.spring.entity.Supplier;
+import com.sahan.spring.exception.RecordAlreadySubmittedException;
+import com.sahan.spring.exception.RecordNotFoundException;
 import com.sahan.spring.repo.SupplierRepo;
 import com.sahan.spring.service.SupplierService;
 import org.modelmapper.ModelMapper;
@@ -13,6 +15,9 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static com.sahan.spring.constant.ExceptionMessageConstant.*;
+import static com.sahan.spring.constant.AppConstant.*;
+
 @Service
 @Transactional
 public class SupplierServiceImpl implements SupplierService {
@@ -23,45 +28,45 @@ public class SupplierServiceImpl implements SupplierService {
     private ModelMapper mapper;
 
     @Override
-    public String saveSupplier(SupplierDTO dto) {
+    public String saveSupplier(SupplierDTO dto) throws RecordAlreadySubmittedException {
         if (!repo.existsById(dto.getSupNic())) {
             Supplier c = mapper.map(dto, Supplier.class);
             repo.save(c);
-            return "Saved Successfully";
+            return SAVE_SUCCESSFUL;
         } else {
-            throw new RuntimeException("Supplier already exist!");
+            throw new RecordAlreadySubmittedException(SUPPLIER_ALREADY_SUBMITTED);
         }
     }
 
     @Override
-    public String updateSupplier(SupplierDTO dto) {
+    public String updateSupplier(SupplierDTO dto) throws RecordNotFoundException {
         if (repo.existsById(dto.getSupNic())) {
             Supplier c = mapper.map(dto, Supplier.class);
             repo.save(c);
-            return "Updated Successfully";
+            return UPDATE_SUCCESSFUL;
         } else {
-            throw new RuntimeException("No such supplier detail to update..!");
+            throw new RecordNotFoundException(SUPPLIER_NOT_FOUND);
         }
     }
 
     @Override
-    public SupplierDTO searchSupplier(String nic) {
+    public SupplierDTO searchSupplier(String nic) throws RecordNotFoundException {
         Optional<Supplier> supplier = repo.findById(nic);
         if (supplier.isPresent()) {
             return mapper.map(supplier.get(), SupplierDTO.class);
         } else {
-            throw new RuntimeException("No supplier details for id: " + nic);
+            throw new RecordNotFoundException(RECORD_NOT_FOUND + nic);
         }
     }
 
 
     @Override
-    public String deleteSupplier(String nic) {
+    public String deleteSupplier(String nic) throws RecordNotFoundException {
         if (repo.existsById(nic)) {
             repo.deleteById(nic);
-            return "Deleted Successfully";
+            return DELETE_SUCCESSFUL;
         } else {
-            throw new RuntimeException("No supplier for delete ID: " + nic);
+            throw new RecordNotFoundException(RECORD_NOT_FOUND + nic);
         }
 
     }
