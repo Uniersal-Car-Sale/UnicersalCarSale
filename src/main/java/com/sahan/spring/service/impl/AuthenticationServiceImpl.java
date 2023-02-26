@@ -1,9 +1,12 @@
 package com.sahan.spring.service.impl;
 
+import com.sahan.spring.dto.UserDetailDto;
 import com.sahan.spring.entity.UserDetail;
 import com.sahan.spring.exception.AuthRejectedException;
+import com.sahan.spring.exception.RecordAlreadySubmittedException;
 import com.sahan.spring.repo.AuthenticationRepo;
 import com.sahan.spring.service.AuthenticationService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,8 +14,7 @@ import javax.transaction.Transactional;
 import java.util.Optional;
 
 import static com.sahan.spring.constant.AppConstant.*;
-import static com.sahan.spring.constant.ExceptionMessageConstant.INVALID_AUTH;
-import static com.sahan.spring.constant.ExceptionMessageConstant.INVALID_PASSWORD;
+import static com.sahan.spring.constant.ExceptionMessageConstant.*;
 
 @Service
 @Transactional
@@ -20,6 +22,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Autowired
     private AuthenticationRepo authenticationRepo;
+
+    @Autowired
+    private ModelMapper mapper;
 
     @Override
     public String login(String userName, String password) throws AuthRejectedException {
@@ -35,6 +40,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             }
         } else {
             throw new AuthRejectedException(INVALID_AUTH);
+        }
+    }
+
+    @Override
+    public String registerCredentials(UserDetailDto userDetailDto) {
+        if (!authenticationRepo.existsById(userDetailDto.getUserName())) {
+            UserDetail c = mapper.map(userDetailDto, UserDetail.class);
+            authenticationRepo.save(c);
+            return SAVE_SUCCESSFUL;
+        } else {
+            throw new RecordAlreadySubmittedException(CUSTOMER_ALREADY_SUBMITTED);
         }
     }
 }
