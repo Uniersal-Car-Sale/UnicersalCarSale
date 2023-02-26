@@ -13,7 +13,6 @@ import javax.persistence.Id;
 @Entity
 public class UserDetail {
     @Id
-    private long userId;
     private String userName;
     private String password;
 }
